@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { demoItems, getDemoStats } from '@/lib/demoData'
+import { SettingsModal } from '@/components/SettingsModal'
 
 const sourceSummary = [
   { label: 'ACT', value: 'Regulatory changes and deadlines', color: 'rose' },
@@ -25,6 +26,7 @@ export default function Home() {
   const [whatsappPhone, setWhatsappPhone] = useState('')
   const [whatsappLoading, setWhatsappLoading] = useState(false)
   const [whatsappMessage, setWhatsappMessage] = useState('')
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const filteredItems = selectedFlag ? demoItems.filter((item) => item.flag === selectedFlag) : demoItems
   
@@ -72,11 +74,22 @@ export default function Home() {
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
       <div className="mx-auto max-w-5xl">
         <header className="mb-10 rounded-3xl border border-slate-800 bg-slate-900/60 p-8 shadow-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-300">Advice Monitor</p>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-white">Digest dashboard</h1>
-          <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">
-            Track advice and regulatory updates across your favorite public sources. Free-first monitoring with optional AI summarization and email digests.
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-300">Advice Monitor</p>
+              <h1 className="mt-4 text-4xl font-bold tracking-tight text-white">Digest dashboard</h1>
+              <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">
+                Track advice and regulatory updates across your favorite public sources. Free-first monitoring with optional AI summarization and email digests.
+              </p>
+            </div>
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="rounded-lg bg-slate-800 px-4 py-2 text-white hover:bg-slate-700"
+              title="Settings"
+            >
+              ⚙️
+            </button>
+          </div>
         </header>
 
         <section className="grid gap-6 md:grid-cols-4">
@@ -259,7 +272,7 @@ export default function Home() {
           </ul>
         </section>
 
-        <section className="mt-10 rounded-3xl border border-slate-800 bg-slate-900 p-8">
+        <section id="whatsapp-scroll" className="mt-10 rounded-3xl border border-slate-800 bg-slate-900 p-8">
           <h2 className="text-2xl font-semibold text-white">📱 Send Digest via WhatsApp</h2>
           <p className="mt-2 text-sm text-slate-400">Get your latest digest sent directly to WhatsApp</p>
           <div className="mt-6 space-y-4">
@@ -314,6 +327,8 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </main>
   )
 }
