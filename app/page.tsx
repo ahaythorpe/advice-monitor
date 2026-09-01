@@ -22,6 +22,9 @@ export default function Home() {
   const [aiSummariser, setAiSummariser] = useState(false)
   const [contentIntake, setContentIntake] = useState(true)
   const [selectedFlag, setSelectedFlag] = useState<'ACT' | 'KNOW' | 'NOTE' | null>(null)
+  const [whatsappPhone, setWhatsappPhone] = useState('')
+  const [whatsappLoading, setWhatsappLoading] = useState(false)
+  const [whatsappMessage, setWhatsappMessage] = useState('')
 
   const filteredItems = selectedFlag ? demoItems.filter((item) => item.flag === selectedFlag) : demoItems
   
@@ -33,6 +36,37 @@ export default function Home() {
     }
     itemsByTopic.get(item.topic)!.push(item)
   })
+
+  const handleWhatsappSend = async () => {
+    if (!whatsappPhone.trim()) {
+      setWhatsappMessage('Please enter a WhatsApp number')
+      return
+    }
+
+    setWhatsappLoading(true)
+    setWhatsappMessage('')
+
+    try {
+      const response = await fetch('/api/whatsapp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber: whatsappPhone, selectedFlag }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setWhatsappMessage(data.demo ? '✓ Demo mode: Message preview generated (configure Twilio to send)' : '✓ Digest sent to WhatsApp!')
+        setWhatsappPhone('')
+      } else {
+        setWhatsappMessage(data.error || 'Failed to send')
+      }
+    } catch (error) {
+      setWhatsappMessage('Error sending digest')
+    } finally {
+      setWhatsappLoading(false)
+    }
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
@@ -223,6 +257,34 @@ export default function Home() {
             <li>• Optional features: email digests and AI summaries are disabled by default and require setup.</li>
             <li>• Privacy-focused: your data and credentials remain under your control.</li>
           </ul>
+        </section>
+
+        <section className="mt-10 rounded-3xl border border-slate-800 bg-slate-900 p-8">
+          <h2 className="text-2xl font-semibold text-white">📱 Send Digest via WhatsApp</h2>
+          <p className="mt-2 text-sm text-slate-400">Get your latest digest sent directly to WhatsApp</p>
+          <div className="mt-6 space-y-4">
+            <div className="flex gap-3">
+              <input
+                type="text"
+                placeholder="Enter WhatsApp number (e.g., +61412345678)"
+                value={whatsappPhone}
+                onChange={(e) => setWhatsappPhone(e.target.value)}
+                className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-white placeholder-slate-500 focus:border-green-500 focus:outline-none"
+              />
+              <button
+                onClick={handleWhatsappSend}
+                disabled={whatsappLoading}
+                className="rounded-lg bg-green-600 px-6 py-2 font-medium text-white hover:bg-green-700 disabled:opacity-50"
+              >
+                {whatsappLoading ? 'Sending...' : 'Send'}
+              </button>
+            </div>
+            {whatsappMessage && (
+              <div className={`rounded-lg px-4 py-3 text-sm ${whatsappMessage.includes('✓') ? 'bg-green-500/10 text-green-300' : 'bg-red-500/10 text-red-300'}`}>
+                {whatsappMessage}
+              </div>
+            )}
+          </div>
         </section>
 
         <section className="mt-10 rounded-3xl border border-slate-800 bg-slate-900 p-8">
