@@ -23,12 +23,20 @@ export default function Home() {
   const [aiSummariser, setAiSummariser] = useState(false)
   const [contentIntake, setContentIntake] = useState(true)
   const [selectedFlag, setSelectedFlag] = useState<'ACT' | 'KNOW' | 'NOTE' | null>(null)
+  const [selectedSource, setSelectedSource] = useState<string | null>(null)
   const [whatsappPhone, setWhatsappPhone] = useState('')
   const [whatsappLoading, setWhatsappLoading] = useState(false)
   const [whatsappMessage, setWhatsappMessage] = useState('')
   const [settingsOpen, setSettingsOpen] = useState(false)
 
-  const filteredItems = selectedFlag ? demoItems.filter((item) => item.flag === selectedFlag) : demoItems
+  // Get unique sources
+  const sources = Array.from(new Set(demoItems.map((item) => item.source_name))).sort()
+
+  const filteredItems = demoItems.filter((item) => {
+    const matchesFlag = !selectedFlag || item.flag === selectedFlag
+    const matchesSource = !selectedSource || item.source_name === selectedSource
+    return matchesFlag && matchesSource
+  })
   
   // Group items by topic
   const itemsByTopic = new Map<string, typeof demoItems>()
@@ -124,26 +132,43 @@ export default function Home() {
         </section>
 
         <section className="mt-10 rounded-3xl border border-slate-800 bg-slate-900/70 p-8">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <h2 className="text-2xl font-semibold text-white">Latest items</h2>
-            <div className="flex gap-2">
-              {(['ACT', 'KNOW', 'NOTE'] as const).map((flag) => (
-                <button
-                  key={flag}
-                  onClick={() => setSelectedFlag(selectedFlag === flag ? null : flag)}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-[0.1em] transition-all ${
-                    selectedFlag === flag
-                      ? flag === 'ACT'
-                        ? 'bg-red-600 text-white border border-red-500'
-                        : flag === 'KNOW'
-                          ? 'bg-orange-600 text-white border border-orange-500'
-                          : 'bg-green-600 text-white border border-green-500'
-                      : 'bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600'
-                  }`}
-                >
-                  {flag}
-                </button>
-              ))}
+            <div className="flex flex-wrap gap-3">
+              {/* Source Filter */}
+              <select
+                value={selectedSource || ''}
+                onChange={(e) => setSelectedSource(e.target.value || null)}
+                className="rounded-full border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:border-slate-600"
+              >
+                <option value="">All Sources</option>
+                {sources.map((source) => (
+                  <option key={source} value={source}>
+                    {source}
+                  </option>
+                ))}
+              </select>
+
+              {/* Category Filter */}
+              <div className="flex gap-2">
+                {(['ACT', 'KNOW', 'NOTE'] as const).map((flag) => (
+                  <button
+                    key={flag}
+                    onClick={() => setSelectedFlag(selectedFlag === flag ? null : flag)}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-[0.1em] transition-all ${
+                      selectedFlag === flag
+                        ? flag === 'ACT'
+                          ? 'bg-red-600 text-white border border-red-500'
+                          : flag === 'KNOW'
+                            ? 'bg-orange-600 text-white border border-orange-500'
+                            : 'bg-green-600 text-white border border-green-500'
+                        : 'bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600'
+                    }`}
+                  >
+                    {flag}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
